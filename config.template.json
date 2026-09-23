@@ -1,0 +1,14 @@
+{
+  "_comment": "复制本文件为 config.json 并填入真实账号密码。删除本字段以外的字段以外的内容。",
+  "_how_to_use": "1) 复制本文件为 config.json  2) 用记事本打开 config.json  3) 把 username/password 改成你的账号  4) 保存",
+
+  "DIRECTORY_URL": "https://www.shgb.cn/djrck/political/classBase/classStudy?classid=49ec429ae61511f093a3fa163e63cb5f",
+
+  "username": "your_username_here",
+  "password": "your_password_here",
+
+  "_login_hints": "登录页 selector 通常是 input[name='username' 或 name='userid'], input[type='password'], button:has-text('登录')。如果自动填不上,告诉我页面结构。",
+
+  "FINISHED_BEHAVIOR": "stop",
+  "_finished_behavior_help": "'stop' = 全部完成就退出;'patrol' = 完成也继续巡检每 5 分钟。"
+}

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+*.exe
+
+# Logs
+logs/
+*.log
+
+# Runtime state
+state.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets (just in case)
+.env
+.env.*
+!.env.example
+
+# Local config overrides (keep config.json since it's desensitized)
+# But keep option to gitignore if user adds credentials back
+# config.json
