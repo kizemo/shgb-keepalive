@@ -175,7 +175,8 @@ F:\soft\00selfmade\shgb-keepalive\
 
 ## 九、对话引用
 
-**GitHub**: kizemo/shgb-keepalive (待创建)
+**GitHub**: https://github.com/kizemo/shgb-keepalive (私有,2026-09-23 创建)
+**Release v1.1.0**: https://github.com/kizemo/shgb-keepalive/releases/tag/v1.1.0
 **本地**: F:\soft\00selfmade\shgb-keepalive\
 **旧位置(残留)**: E:\shgb-auto\(只剩 node_modules/ 和被 Edge 锁住的 logs/edge.log)
 
@@ -192,5 +193,6 @@ F:\soft\00selfmade\shgb-keepalive\
 
 ---
 
-**最后更新**: 2026-09-23 (搬家+脱敏+打包+首次 commit 后)
+**最后更新**: 2026-09-23 (搬家+脱敏+打包+首次 commit + GitHub Release v1.1.0 后)
 **下次接力前**: 看 `logs\auto-next.log` 是否还在产生新 cycle;若 24h 无新输出,可能脚本假死,需查 silent wait 逻辑。
+**会话工作清单**: 见 TodoList(各次会话开头 TaskCreate 跟踪)
