@@ -6,11 +6,22 @@ shgb.cn (上海干部在线学习) 视频自动循环播放工具。Playwright +
 
 ---
 
+## 状态
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-24+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Bun](https://img.shields.io/badge/Bun-1.1+-F9F1E1?logo=bun&logoColor=black)](https://bun.sh)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20x64-0078D4?logo=windows)](https://www.microsoft.com/windows)
+
+[Release v1.1.0](https://github.com/kizemo/shgb-keepalive/releases/tag/v1.1.0) · [HANDOFF.md](./HANDOFF.md) · [Issues](https://github.com/kizemo/shgb-keepalive/issues)
+
+---
+
 ## 产物清单
 
 | 文件 | 大小 | 作用 |
 |------|------|------|
-| **`shgb-keepalive.exe`** | ~94 MB | 执行文件,免安装,Bun runtime + 脚本 |
+| **`shgb-keepalive.exe`** | ~44 MB | 执行文件,免安装,Bun runtime + 脚本 |
 | **`dist\shgb-keepalive-installer.exe`** | ~27 MB | 安装文件,一次性安装 playwright 依赖 |
 | `auto-next.mjs` | ~47 KB | 主脚本源码(已脱敏) |
 | `config.json` | <1 KB | 脱敏版配置,**不含凭证** |
@@ -19,6 +30,8 @@ shgb.cn (上海干部在线学习) 视频自动循环播放工具。Playwright +
 | `build-installer.mjs` | - | 构建 installer 的脚本 |
 | `node_modules\` | ~35 MB | 仅含 playwright(运行时依赖,经 installer 装) |
 | `logs\` | - | 运行日志 |
+
+> **下载预编译产物**: 见 [Releases](https://github.com/kizemo/shgb-keepalive/releases)
 
 ---
 
