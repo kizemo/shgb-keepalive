@@ -1,0 +1,19 @@
+;7z SFX 安装器配置
+;由 build-installer.mjs 在打包时复制到 staging 目录
+;
+;字段含义:
+;  Title          - 安装窗口标题
+;  ExtractTitle   - 解压阶段窗口标题
+;  ExtractPathText- 提示用户输入路径的文本
+;  InstallPath    - 默认安装路径(%LOCALAPPDATA% = 当前用户)
+;  RunProgram     - 安装完成后自动运行的命令
+;  BeginPrompt    - 是否显示"开始安装"提示(yes/no)
+;  Progress       - 是否显示进度(yes/no)
+
+Title="shgb-keepalive 安装"
+ExtractTitle="正在解压 shgb-keepalive..."
+ExtractPathText="请选择安装目录(默认 %LOCALAPPDATA%\\shgb-keepalive):"
+InstallPath="%LOCALAPPDATA%\\shgb-keepalive"
+RunProgram="cmd /c \"\"%~dp0launch.bat\"\""
+BeginPrompt="yes"
+Progress="yes"
