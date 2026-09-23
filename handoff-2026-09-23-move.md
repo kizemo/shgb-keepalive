@@ -32,9 +32,9 @@ node auto-next.mjs
 
 ## 当前状态(2026-09-23 07:30)
 
-- **Edge**: 仍在跑(CDP 9222 监听,登录态 `<REDACTED_USERNAME>` 保留),17 个进程从 09-22 8:57 起
+- **Edge**: 仍在跑(CDP 9222 监听,登录态 `<username>` 保留),17 个进程从 09-22 8:57 起
 - **node (auto-next.mjs)**: **已停**(用户授权停止)。4 个 node 全是 claude-mem MCP server,无 auto-next
-- **登录**: `<REDACTED_USERNAME>` 已登录(Edge session 没动)
+- **登录**: `<username>` 已登录(Edge session 没动)
 - **config.json DIRECTORY_URL**: 49ec429ae61511f093a3fa163e63cb5f(原专题,未被覆盖)
 
 ## 搬家前最后状态

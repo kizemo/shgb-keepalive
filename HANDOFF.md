@@ -151,7 +151,7 @@ F:\soft\00selfmade\shgb-keepalive\
    - 加单元测试(对 selector 改动有保护)
    - 加 lint (eslint)
 5. **功能扩展**:
-   - 多账号支持(队列跑几个 <REDACTED_USERNAME>)— 注意:必须仍要求手动登录,不能让工具碰凭证
+   - 多账号支持(队列跑几个不同用户)— 注意:必须仍要求手动登录,不能让工具碰凭证
    - 学习时长统计面板
    - 异常告警(钉钉/飞书 webhook)
 6. **跨平台**: Bun 支持 macOS/Linux 编译,可加 `--target=bun-darwin-x64` 等

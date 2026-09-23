@@ -37,7 +37,7 @@ node auto-next.mjs
   - `clist`, `allClass` (other — 探针残留,可关)
   - `detail?id=...` (video tab)
 - **Playwright**: 当前 background task `bvrk5c1ip` 仍在跑(cycle 5+,正在处理专题 `ef00ac97` 即"推动国际金融中心增强竞争力和影响力")。
-- **登录**: `<REDACTED_USERNAME>` 已登录
+- **登录**: `<username>` 已登录
 - **config.json DIRECTORY_URL**: 当前内存中可能已是 ef00ac97,**但 config.json 文件里写的还是 49ec429ae**(切换时会自动覆盖)。脚本重启会从 config.json 读取。
 
 ## 核心机制
