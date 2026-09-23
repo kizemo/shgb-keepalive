@@ -23,14 +23,15 @@
 
 ### ✅ 已完成
 
-1. **脱敏** (v1.1.0): 凭证从 `config.json` 删除,改为 CLI > env > config 优先级
-2. **打包执行 exe** (94 MB): Bun `--compile`,免安装,自带 runtime
-3. **打包安装 exe** (27 MB): 7z SFX,一次性部署 playwright 依赖
-4. **文档完整**: README + 三份 handoff + build 脚本
+1. **完全脱敏** (v1.1.x): `auto-next.mjs` 不再读取/存储任何登录凭证,删除了 `--username` / `--password` / `SHGB_USERNAME` / `SHGB_PASSWORD` / `config.username` / `config.password` 全部通道。用户在 Edge 窗口里手动登录即可,Edge profile `D:\EdgeProfile_SBT` 会保留登录态。
+2. **一键启动器** `launch.bat`: 双击即可完成 Edge CDP 启动 + exe 启动,无需命令行。
+3. **打包执行 exe** (94 MB): Bun `--compile`,免安装,自带 runtime
+4. **打包安装 exe** (27 MB): 7z SFX,一次性部署 playwright 依赖 + launch.bat
+5. **文档完整**: README + 三份 handoff + build 脚本
 
 ### 🟡 部分完成
 
-- **本会话未做 smoke test**(用户明确跳过)。exe 与 installer 构建都过了完整性检查(`7z t`),实际跑没验证。
+- **本会话未做 smoke test**(用户明确跳过)。exe 与 installer 构建都过了完整性检查(`7z t`),实际跑没验证。launch.bat 的 Edge 路径检测 / CDP 等待逻辑是新的,本会话只做了代码 review,没真机测。
 
 ### ❌ 未开始
 
@@ -50,8 +51,8 @@ F:\soft\00selfmade\shgb-keepalive\
 ├── LICENSE                          ← MIT
 ├── .gitignore                       ← gitignore 规则
 │
-├── auto-next.mjs                    ← 主循环脚本(47 KB)
-├── config.json                      ← 脱敏配置,不含凭证
+├── auto-next.mjs                    ← 主循环脚本(47 KB,不管理任何凭证)
+├── config.json                      ← 配置(**不含凭证字段**)
 ├── config.template.json             ← 配置模板(用户首次用可参考)
 │
 ├── inspect.mjs                      ← 探针: 打印 DOM 状态
@@ -63,10 +64,11 @@ F:\soft\00selfmade\shgb-keepalive\
 │
 ├── package.json                     ← npm 配置,含 build 脚本
 ├── package-lock.json                ← 锁定 playwright 版本
-├── build-installer.mjs              ← 7z SFX installer 构建脚本
+├── build-installer.mjs              ← 7z SFX installer 构建脚本(自动同步 launch.bat)
 │
-├── run.bat                          ← 开发模式: 启 Edge + node auto-next.mjs
-├── start-edge.bat                   ← 单独启 Edge
+├── launch.bat                       ← 双击启动器: 启 Edge CDP + 跑 exe
+├── run.bat                          ← (旧)开发模式: 启 Edge + node auto-next.mjs
+├── start-edge.bat                   ← (旧)单独启 Edge
 ├── stop.bat                         ← 杀 Edge + node
 ├── install-task.bat                 ← (旧)Windows 计划任务注册脚本
 │
@@ -115,7 +117,8 @@ F:\soft\00selfmade\shgb-keepalive\
 | **Bun 打包执行 exe** | Bun 编译快(29ms vs pkg 几小时),自带 JS runtime | pkg: 不支持 Node 24;Node SEA: prebuilt 无 fuse |
 | **playwright 标 external** | playwright 35MB + native code,Bun 装不下 | esbuild bundle: 失败(native 解析) |
 | **7z SFX 安装包** | NSIS/Inno Setup 没装,7z 自带 SFX | NSIS/Inno: 需安装且复杂 |
-| **凭证 CLI > env > config** | 分发场景要求脱敏,凭证不入库 | base64 in config: 等于不脱敏 |
+| **凭证 0 管理** | 用户自己输;Edge profile 保留登录态;工具永不接触凭证 | CLI/env/config: 凭证进工具 = 凭证泄露面 |
+| **launch.bat 双击启动** | 普通用户不碰命令行;启动器把 Edge + exe 串起来 | exe 自启 Edge: 需要 spawn 进程 + 检测路径,exe 内部多 100+ 行 |
 | **stealth injection** | shgb.cn 检测 `navigator.webdriver`,不抹就 30s 重置视频 | 不抹: 视频永远播不完 |
 
 ---
@@ -129,9 +132,10 @@ F:\soft\00selfmade\shgb-keepalive\
 5. **run.bat 会清 Edge tabs**: 不要用它重启,会丢登录态;改手动启 Edge
 6. **stealth script 报 "Cannot redefine property: webdriver"**: 无害(已定义过),try/catch 包了
 7. **triedClassIds 只在内存**: 重启后会清空,可能重复试已失败的专题
-8. **config.json 写入时机**: 切换专题时 `fs.writeFileSync(CONFIG_PATH, ...)` 会覆盖整个 config — 现在已 `delete CONFIG.username/password`,凭证不会被回写
+8. **config.json 写入时机**: 切换专题时 `fs.writeFileSync(CONFIG_PATH, ...)` 会覆盖整个 config — 现在已完全无凭证字段,不用担心回写
 9. **沙箱测试**: 不要在主机直接跑 installer,会污染 Edge 登录态;Sandbox 验证脚本在 `F:\soft\00selfmade\sandbox-verify\`(但本项目未集成,需手动)
 10. **shgb.cn 不定期改 DOM**: selector 集中在 `auto-next.mjs` 顶部常量,改一处即可
+11. **launch.bat 路径检测**: 硬编码两个 Edge 安装路径(Program Files (x86) + Program Files)。如果用户用的是 MSIX / Dev / Beta channel,需要手动改 EDGE_PATH
 
 ---
 
@@ -139,14 +143,15 @@ F:\soft\00selfmade\shgb-keepalive\
 
 ### 用户可能想做的事
 
-1. **加 GitHub Actions 自动构建**: 每次 push 自动 `npm run build`,产物上传 Release
-2. **加 changelog/release 流程**: 用 git tag + release-it / semantic-release
-3. **代码质量改进**: 
+1. **launch.bat 真机 smoke test**: 双击跑一次,确认 Edge CDP 启动 + exe 启动 + 手动登录 + 自动巡课整链路通畅
+2. **加 GitHub Actions 自动构建**: 每次 push 自动 `npm run build`,产物上传 Release
+3. **加 changelog/release 流程**: 用 git tag + release-it / semantic-release
+4. **代码质量改进**:
    - TypeScript 重构(减少 L1075-1102 那种字符串 selector)
    - 加单元测试(对 selector 改动有保护)
    - 加 lint (eslint)
-4. **功能扩展**:
-   - 多账号支持(队列跑几个 <REDACTED_USERNAME>)
+5. **功能扩展**:
+   - 多账号支持(队列跑几个 <REDACTED_USERNAME>)— 注意:必须仍要求手动登录,不能让工具碰凭证
    - 学习时长统计面板
    - 异常告警(钉钉/飞书 webhook)
 6. **跨平台**: Bun 支持 macOS/Linux 编译,可加 `--target=bun-darwin-x64` 等

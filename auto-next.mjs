@@ -1,17 +1,18 @@
 // ============================================================
-// shgb.cn auto loop (v3: 登录 + 目录 + 播放 + watchdog)
+// shgb.cn auto loop (v4: 仅手动登录 + 目录 + 播放 + watchdog)
 //
 // 完整流程:
 //   1. 连 CDP → 找/打开 shgb.cn tab
 //   2. 导航到 DIRECTORY_URL (从 config.json)
-//   3. 检查登录态, 必要时自动登录 (config.json 有凭证)
-//      没凭证 → 等待手动登录 (最多 5 min)
+//   3. 检查登录态, 未登录则等待用户在 Edge 窗口里手动登录(最多 1 分钟)
 //   4. 主页循环:
 //      - 找第一个"开始学习/继续学习"按钮并点击
 //      - 跳到 /course/detail 后等视频 ended
 //      - watchdog 每 30s 检测, 视频暂停自动恢复
 //      - 回到目录, 找下一个; 翻完一页点下一页
 //      - 全部完成 → 按 FINISHED_BEHAVIOR 退出或巡检
+//
+// 本工具不读取、不存储、不传递任何登录凭证。所有凭证相关操作都在 Edge 窗口里人工完成。
 //
 // 纯 DOM 操作, 不截图, 不操控网络。
 // ============================================================
@@ -28,8 +29,6 @@ const STATE_FILE = path.resolve('logs', 'state.json');
 // -------- 从 config.json 读 --------
 const configTemplate = {
     DIRECTORY_URL: 'https://www.shgb.cn/djrck/political/classBase/classStudy?classid=49ec429ae61511f093a3fa163e63cb5f',
-    username: '',
-    password: '',
     FINISHED_BEHAVIOR: 'stop',  // 'stop' 或 'patrol'
 };
 
@@ -47,24 +46,14 @@ if (fs.existsSync(CONFIG_PATH)) {
         process.exit(1);
     }
 } else {
-    console.warn(`[WARN] config.json not found. Auto-login disabled, manual login required.`);
-    console.warn(`       Copy config.template.json to config.json and fill in credentials.`);
+    console.warn(`[WARN] config.json not found. Falling back to defaults from config.template.json.`);
 }
 
 let DIRECTORY_URL = CONFIG.DIRECTORY_URL;
-
-// -------- 凭证: 优先级 CLI > env > config --------
-function argValue(flag) {
-    const i = process.argv.indexOf(flag);
-    return i >= 0 && i + 1 < process.argv.length ? process.argv[i + 1] : null;
-}
-const USERNAME = argValue('--username') || process.env.SHGB_USERNAME || CONFIG.username || '';
-const PASSWORD = argValue('--password') || process.env.SHGB_PASSWORD || CONFIG.password || '';
 const FINISHED_BEHAVIOR = CONFIG.FINISHED_BEHAVIOR === 'patrol' ? 'patrol' : 'stop';
 
-// 把凭证从 CONFIG 里清掉,避免后面 fs.writeFileSync 把凭证写回 config.json
-delete CONFIG.username;
-delete CONFIG.password;
+// 本工具不管理登录凭证。Edge 启动后由用户在浏览器窗口里手动登录。
+// 主循环每次回到目录页都会重新检查登录态,所以即使首次 1 分钟内未完成登录,后续仍可进入。
 
 // -------- 常量 --------
 const VIDEO_SELECTOR = 'video';
@@ -173,7 +162,7 @@ async function detectLoggedIn(page) {
     });
 }
 
-async function autoLogin(page) {
+async function ensureLoggedIn(page) {
     const before = await detectLoggedIn(page);
     if (before.loggedIn) {
         log(`✓ already logged in as: ${before.name} (url=${before.url})`);
@@ -196,57 +185,8 @@ async function autoLogin(page) {
         }
     }
 
-    if (!USERNAME || !PASSWORD) {
-        log(`[INFO] no credentials in config.json. Waiting up to ${LOGIN_DETECT_TIMEOUT_MS / 1000}s for manual login...`);
-        return await waitForLogin(page);
-    }
-
-    log(`attempting auto-login as ${USERNAME}...`);
-
-    // 自动填表单
-    try {
-        await page.evaluate(({ username, password }) => {
-            const userInputs = document.querySelectorAll(
-                'input[name*="user" i], input[name*="login" i], input[name*="account" i], input[type="text"]'
-            );
-            const passInputs = document.querySelectorAll('input[type="password"]');
-            if (userInputs.length) userInputs[0].value = username;
-            if (passInputs.length) passInputs[0].value = password;
-            [userInputs[0], passInputs[0]].filter(Boolean).forEach(el => {
-                el.dispatchEvent(new Event('input', { bubbles: true }));
-                el.dispatchEvent(new Event('change', { bubbles: true }));
-            });
-        }, { username: USERNAME, password: PASSWORD });
-        log(`  · credentials written`);
-    } catch (err) {
-        log(`  · auto-fill failed: ${err.message}`);
-    }
-
-    // 找登录按钮并点击
-    const loginBtnSel = await clickFirstAvailable(page, [
-        'button:has-text("登录")',
-        'button:has-text("登 录")',
-        'a:has-text("登录")',
-        'input[type="submit"]',
-        '.login-btn',
-        '#loginBtn',
-        'a[onclick*="login" i]',
-        'a[onclick*="studentlogin" i]',
-    ], 'login-btn');
-
-    if (loginBtnSel) {
-        await page.waitForTimeout(3000);
-    } else {
-        log(`[WARN] no login button found.`);
-    }
-
-    const after = await detectLoggedIn(page);
-    if (after.loggedIn) {
-        log(`✓ auto-login success: ${after.name}`);
-        return true;
-    }
-
-    log(`[WARN] auto-login may have failed (likely captcha). Waiting for manual login...`);
+    // 本工具不管理凭证: 始终等待用户在 Edge 窗口里手动登录 + 过滑动验证
+    log(`[INFO] 等待手动登录 shgb.cn (滑动验证必须人工通过)。最多等 ${LOGIN_DETECT_TIMEOUT_MS / 1000}s,超时也会进入主循环并在回到目录页时重新检查登录态。`);
     return await waitForLogin(page);
 }
 
@@ -1136,7 +1076,7 @@ async function main() {
     }
 
     // 等登录(在目录页上检测)
-    const loggedIn = await autoLogin(dirPage);
+    const loggedIn = await ensureLoggedIn(dirPage);
     if (!loggedIn) {
         log(`[WARN] login not detected within timeout. Continuing...`);
     }
