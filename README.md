@@ -4,6 +4,8 @@ shgb.cn (上海干部在线学习) 视频自动循环播放工具。Playwright +
 
 > **2026-09-23 v1.1.x**: 不管理任何登录凭证(用户手动在 Edge 中登录),一键启动器 `launch.bat`,打包成两个 exe(执行文件 + 安装文件),免 Node.js 环境依赖。
 
+![shgb.cn 首页](docs/images/shgb-homepage.png)
+
 ---
 
 ## 状态
